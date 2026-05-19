@@ -1,0 +1,19 @@
+networks:
+  superpalpite_net:
+    name: superpalpite_net
+
+services:
+  superpalpite_app:
+    build:
+      context: ./app
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+    container_name: superpalpite_app
+    restart: unless-stopped
+    ports:
+      - "3010:3000"
+    env_file: .env
+    networks:
+      - superpalpite_net
