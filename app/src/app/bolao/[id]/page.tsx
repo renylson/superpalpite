@@ -1,10 +1,11 @@
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { CountdownTimer } from '@/components/CountdownTimer';
 import { ListaPalpites } from '@/components/ListaPalpites';
 import { PalpiteForm } from '@/components/PalpiteForm';
 import { PremioAtual } from '@/components/PremioAtual';
+import { TeamLogo } from '@/components/TeamLogo';
 import { Badge } from '@/components/ui/Badge';
-import { Card } from '@/components/ui/Card';
 import { createServiceSupabaseClient } from '@/lib/supabase/server';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import type { Pool, PublicPaidGuess } from '@/types';
@@ -23,39 +24,150 @@ async function getData(id: string): Promise<{ pool: Pool; guesses: PublicPaidGue
   }
 }
 
+const statusLabel: Record<string, string> = {
+  aberto: 'Aberto',
+  encerrado: 'Encerrado',
+  aguardando_resultado: 'Aguardando resultado',
+  resultado_publicado: 'Resultado publicado',
+  premio_pago: 'Prêmio pago',
+  sem_ganhadores: 'Sem ganhadores',
+  cancelado: 'Cancelado',
+};
+
 export default async function PoolPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const data = await getData(id);
   if (!data) notFound();
+
   const game = data.pool.games;
+  const isOpen = data.pool.status === 'aberto';
+
   return (
-    <section className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[1fr_380px]">
-      <div className="space-y-6">
-        <Card>
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <Badge>{data.pool.status}</Badge>
-              <h1 className="mt-4 text-4xl font-black">{game?.home_team} x {game?.away_team}</h1>
-              <p className="mt-2 text-zinc-300">{game?.competition || 'Futebol'} {game?.stadium ? `- ${game.stadium}` : ''}</p>
-              {game?.match_date ? <p className="mt-2">Encerra em <CountdownTimer matchDate={game.match_date} /> - {formatDateTime(game.match_date)}</p> : null}
+    <div className="mx-auto max-w-6xl px-4 py-8">
+      {/* Breadcrumb */}
+      <div className="mb-6 flex items-center gap-2 text-sm text-zinc-500">
+        <Link href="/" className="hover:text-zinc-300">Início</Link>
+        <span>/</span>
+        <span className="text-zinc-300">{game?.home_team} x {game?.away_team}</span>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
+        {/* Coluna principal */}
+        <div className="space-y-5">
+          {/* Card do jogo */}
+          <div className="overflow-hidden rounded-xl border border-zinc-800 bg-sp-dark">
+            <div className="border-b border-zinc-800 px-5 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-bold uppercase tracking-wider text-zinc-500">
+                  {game?.competition || 'Futebol'}
+                  {game?.stadium ? ` · ${game.stadium}` : ''}
+                </p>
+                <Badge>{statusLabel[data.pool.status] ?? data.pool.status}</Badge>
+              </div>
             </div>
-            <div className="text-left lg:text-right">
-              <p className="text-sm uppercase text-zinc-400">Prêmio atual</p>
-              <PremioAtual poolId={data.pool.id} initialPrize={data.pool.current_prize_amount} />
+
+            <div className="px-5 py-6">
+              {/* Times com logos */}
+              <div className="flex items-center justify-between gap-6">
+                <div className="flex flex-1 flex-col items-center gap-3 text-center">
+                  <TeamLogo
+                    logo={game?.home_team_logo}
+                    name={game?.home_team || 'Casa'}
+                    size={64}
+                  />
+                  <p className="text-xl font-black">{game?.home_team || 'Casa'}</p>
+                </div>
+
+                <div className="text-center">
+                  <span className="rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm font-black text-zinc-400">
+                    VS
+                  </span>
+                </div>
+
+                <div className="flex flex-1 flex-col items-center gap-3 text-center">
+                  <TeamLogo
+                    logo={game?.away_team_logo}
+                    name={game?.away_team || 'Visitante'}
+                    size={64}
+                  />
+                  <p className="text-xl font-black">{game?.away_team || 'Visitante'}</p>
+                </div>
+              </div>
+
+              {/* Data e countdown */}
+              {game?.match_date && (
+                <div className="mt-5 rounded-lg border border-zinc-800 bg-sp-black/40 p-4 text-center">
+                  <p className="text-sm text-zinc-400">{formatDateTime(game.match_date)}</p>
+                  {isOpen && (
+                    <p className="mt-1 text-sm">
+                      Fecha em <CountdownTimer matchDate={game.match_date} />
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        </Card>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Card><p className="text-zinc-400">Bilhete</p><strong>{formatCurrency(data.pool.ticket_amount)}</strong></Card>
-          <Card><p className="text-zinc-400">Prêmio mínimo</p><strong>{formatCurrency(data.pool.minimum_prize_amount)}</strong></Card>
-          <Card><p className="text-zinc-400">Confirmados</p><strong>{data.pool.paid_guesses_count}</strong></Card>
+
+          {/* Métricas */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-xl border border-zinc-800 bg-sp-dark p-4 text-center">
+              <p className="text-xs text-zinc-500">Bilhete</p>
+              <p className="mt-1 text-lg font-black">{formatCurrency(data.pool.ticket_amount)}</p>
+            </div>
+            <div className="rounded-xl border border-zinc-800 bg-sp-dark p-4 text-center">
+              <p className="text-xs text-zinc-500">Prêmio mínimo</p>
+              <p className="mt-1 text-lg font-black">{formatCurrency(data.pool.minimum_prize_amount)}</p>
+            </div>
+            <div className="rounded-xl border border-zinc-800 bg-sp-dark p-4 text-center">
+              <p className="text-xs text-zinc-500">Confirmados</p>
+              <p className="mt-1 text-lg font-black">{data.pool.paid_guesses_count}</p>
+            </div>
+          </div>
+
+          {/* Prêmio atual em destaque */}
+          <div className="rounded-xl border border-sp-gold/20 bg-gradient-to-r from-sp-gold/5 to-transparent p-6">
+            <p className="text-sm uppercase tracking-widest text-zinc-400">🏆 Prêmio atual</p>
+            <PremioAtual poolId={data.pool.id} initialPrize={data.pool.current_prize_amount} />
+            <p className="mt-2 text-xs text-zinc-500">
+              Atualizado em tempo real · {formatCurrency(data.pool.total_prize_contribution_amount)} acumulados
+            </p>
+          </div>
+
+          {/* Lista de palpites */}
+          <ListaPalpites poolId={data.pool.id} initialGuesses={data.guesses} />
         </div>
-        <ListaPalpites poolId={data.pool.id} initialGuesses={data.guesses} />
+
+        {/* Sidebar — formulário */}
+        <aside className="space-y-4">
+          {isOpen ? (
+            <PalpiteForm poolId={data.pool.id} />
+          ) : (
+            <div className="rounded-xl border border-zinc-700 bg-sp-dark p-5 text-center">
+              <span className="text-4xl">🔒</span>
+              <h3 className="mt-3 font-black">Palpites encerrados</h3>
+              <p className="mt-2 text-sm text-zinc-400">
+                Este bolão não está mais aceitando palpites.
+              </p>
+              <Link href="/" className="mt-4 inline-block text-sm text-sp-gold hover:underline">
+                Ver outros bolões
+              </Link>
+            </div>
+          )}
+
+          <div className="rounded-xl border border-zinc-800 bg-sp-dark p-4 text-sm text-zinc-400">
+            <p className="font-bold text-zinc-300">Como funciona:</p>
+            <ol className="mt-2 space-y-1.5 list-inside list-decimal">
+              <li>Escolha o placar que você acha que vai sair</li>
+              <li>Informe seus dados e a chave Pix</li>
+              <li>Pague o Pix dentro do prazo</li>
+              <li>Se acertar o placar exato, recebe o prêmio</li>
+            </ol>
+            <Link href="/regulamento" className="mt-3 block text-sp-gold hover:underline">
+              Ler regulamento completo →
+            </Link>
+          </div>
+        </aside>
       </div>
-      <aside>
-        <PalpiteForm poolId={data.pool.id} />
-      </aside>
-    </section>
+    </div>
   );
 }
-

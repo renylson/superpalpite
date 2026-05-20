@@ -8,6 +8,8 @@ export interface Game {
   id: string;
   home_team: string;
   away_team: string;
+  home_team_logo: string | null;
+  away_team_logo: string | null;
   competition: string | null;
   match_date: string;
   stadium: string | null;
@@ -34,6 +36,7 @@ export interface Pool {
   total_admin_fee_amount: number;
   total_prize_contribution_amount: number;
   status: PoolStatus;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
   games?: Game | null;

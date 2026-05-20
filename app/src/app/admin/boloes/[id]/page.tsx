@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation';
+import { BolaoActions } from '@/components/admin/BolaoActions';
+import { BolaoDetalheClient } from '@/components/admin/BolaoDetalheClient';
 import { FinancialSummary } from '@/components/admin/FinancialSummary';
-import { ExportButton } from '@/components/admin/ExportButton';
-import { PalpitesTable } from '@/components/admin/PalpitesTable';
 import { Card } from '@/components/ui/Card';
 import { createServiceSupabaseClient } from '@/lib/supabase/server';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatDateTime } from '@/lib/utils';
 import type { Guess, Pool } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -23,21 +23,36 @@ export default async function BolaoDetalhePage({ params }: { params: Promise<{ i
     guesses = (guessData ?? []) as Guess[];
   } catch {}
   if (!pool) notFound();
+
+  const game = pool.games;
+  const canPublishResult = ['aberto', 'encerrado'].includes(pool.status);
+
   return (
     <div className="space-y-5">
       <Card>
-        <h2 className="text-2xl font-black">{pool.title}</h2>
-        <p className="text-zinc-400">{pool.games?.home_team} x {pool.games?.away_team} - {pool.status}</p>
-        <p className="mt-2 text-3xl font-black text-sp-gold">{formatCurrency(pool.current_prize_amount)}</p>
+        <h2 className="text-2xl font-black">
+          {game?.home_team ?? '?'} x {game?.away_team ?? '?'}
+        </h2>
+        <p className="mt-1 text-sm text-zinc-400">
+          {game?.competition ? `${game.competition} · ` : ''}
+          {game?.match_date ? formatDateTime(game.match_date) : '—'}
+        </p>
+        <p className="mt-3 text-3xl font-black text-sp-gold">{formatCurrency(pool.current_prize_amount)}</p>
       </Card>
-      <FinancialSummary total={pool.total_collected_amount} admin={pool.total_admin_fee_amount} prize={pool.total_prize_contribution_amount} paid={pool.paid_guesses_count} />
+
       <Card>
-        <h3 className="mb-3 text-xl font-black">Ações</h3>
-        <div className="flex flex-wrap gap-3">
-          <ExportButton poolId={pool.id} />
-        </div>
+        <h3 className="mb-3 text-base font-black">Controles</h3>
+        <BolaoActions pool={pool} />
       </Card>
-      <PalpitesTable guesses={guesses} />
+
+      <BolaoDetalheClient poolId={pool.id} canPublishResult={canPublishResult} guesses={guesses} />
+
+      <FinancialSummary
+        total={pool.total_collected_amount}
+        admin={pool.total_admin_fee_amount}
+        prize={pool.total_prize_contribution_amount}
+        paid={pool.paid_guesses_count}
+      />
     </div>
   );
 }

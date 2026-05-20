@@ -15,6 +15,8 @@ export const createGuessSchema = z.object({
 export const gameSchema = z.object({
   home_team: z.string().trim().min(2),
   away_team: z.string().trim().min(2),
+  home_team_logo: z.string().optional().nullable().transform(v => (v && v.trim()) || null),
+  away_team_logo: z.string().optional().nullable().transform(v => (v && v.trim()) || null),
   competition: z.string().trim().optional().nullable(),
   stadium: z.string().trim().optional().nullable(),
   match_date: z.string().datetime(),
@@ -22,7 +24,6 @@ export const gameSchema = z.object({
 });
 
 export const poolSchema = z.object({
-  title: z.string().trim().min(3),
   game_id: z.string().uuid(),
   ticket_amount: z.coerce.number().positive(),
   admin_fee_percentage: z.coerce.number().min(0).max(100).default(40),

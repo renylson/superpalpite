@@ -13,6 +13,60 @@ function toDateTimeLocal(value: string | null | undefined) {
   return offsetDate.toISOString().slice(0, 16);
 }
 
+function TeamField({ label, namePrefix, defaultName, defaultLogo }: {
+  label: string;
+  namePrefix: 'home' | 'away';
+  defaultName?: string;
+  defaultLogo?: string;
+}) {
+  const [logo, setLogo] = useState(defaultLogo ?? '');
+
+  return (
+    <div className="space-y-2 rounded-xl border border-zinc-800 bg-sp-black/40 p-4">
+      <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">{label}</p>
+
+      <Input
+        name={`${namePrefix}_team`}
+        placeholder={`Nome do time (ex: ${namePrefix === 'home' ? 'Flamengo' : 'Palmeiras'})`}
+        defaultValue={defaultName ?? ''}
+        required
+      />
+
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-2">
+          {logo && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={logo}
+              alt="preview"
+              className="h-10 w-10 rounded object-contain"
+              onError={(e) => (e.currentTarget.style.display = 'none')}
+            />
+          )}
+          <Input
+            name={`${namePrefix}_team_logo`}
+            placeholder="URL do escudo (opcional)"
+            value={logo}
+            onChange={(e) => setLogo(e.target.value)}
+          />
+        </div>
+        <p className="text-xs text-zinc-600">
+          Encontre o escudo em{' '}
+          <a
+            href="https://football-logos.cc"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sp-gold underline hover:text-sp-gold-dark"
+          >
+            football-logos.cc
+          </a>
+          {' '}→ abra o time → clique com botão direito na imagem → "Copiar endereço da imagem"
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function JogoForm({ game }: { game?: Game }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -39,20 +93,44 @@ export function JogoForm({ game }: { game?: Game }) {
   }
 
   return (
-    <form action={submit} className="grid gap-3">
-      <Input name="home_team" placeholder="Mandante" defaultValue={game?.home_team ?? ''} required />
-      <Input name="away_team" placeholder="Visitante" defaultValue={game?.away_team ?? ''} required />
-      <Input name="competition" placeholder="Competição" defaultValue={game?.competition ?? ''} />
-      <Input name="stadium" placeholder="Estádio" defaultValue={game?.stadium ?? ''} />
-      <Input name="match_date" type="datetime-local" defaultValue={toDateTimeLocal(game?.match_date)} required />
-      <select className="min-h-11 rounded-md border border-zinc-700 bg-sp-black px-3" name="status" defaultValue={game?.status ?? 'agendado'}>
-        <option value="agendado">Agendado</option>
-        <option value="em_andamento">Em andamento</option>
-        <option value="finalizado">Finalizado</option>
-        <option value="cancelado">Cancelado</option>
-      </select>
-      {error ? <p className="rounded-md bg-red-950 p-3 text-sm text-red-200">{error}</p> : null}
-      <Button disabled={loading}>{loading ? 'Salvando...' : game ? 'Atualizar jogo' : 'Salvar jogo'}</Button>
+    <form action={submit} className="space-y-4">
+      <TeamField
+        label="Mandante (Casa)"
+        namePrefix="home"
+        defaultName={game?.home_team}
+        defaultLogo={game?.home_team_logo ?? ''}
+      />
+
+      <TeamField
+        label="Visitante (Fora)"
+        namePrefix="away"
+        defaultName={game?.away_team}
+        defaultLogo={game?.away_team_logo ?? ''}
+      />
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <p className="mb-1 text-xs font-bold uppercase tracking-wider text-zinc-500">Competição</p>
+          <Input name="competition" placeholder="Ex: Brasileirão Série A" defaultValue={game?.competition ?? ''} />
+        </div>
+        <div>
+          <p className="mb-1 text-xs font-bold uppercase tracking-wider text-zinc-500">Estádio</p>
+          <Input name="stadium" placeholder="Ex: Maracanã" defaultValue={game?.stadium ?? ''} />
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-1 text-xs font-bold uppercase tracking-wider text-zinc-500">Data e horário</p>
+        <Input name="match_date" type="datetime-local" defaultValue={toDateTimeLocal(game?.match_date)} required />
+      </div>
+
+      {error && (
+        <div className="rounded-lg border border-red-800 bg-red-950 p-3 text-sm text-red-200">{error}</div>
+      )}
+
+      <Button disabled={loading} className="w-full">
+        {loading ? 'Salvando...' : game ? 'Atualizar jogo' : 'Salvar jogo'}
+      </Button>
     </form>
   );
 }

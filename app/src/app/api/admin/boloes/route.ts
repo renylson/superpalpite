@@ -13,13 +13,26 @@ export async function POST(request: NextRequest) {
   try {
     const admin = await assertAdmin(request.headers.get('authorization'));
     const input = poolSchema.parse(await request.json());
+    const supabase = createServiceSupabaseClient();
+
+    const { data: game } = await supabase
+      .from('games')
+      .select('home_team, away_team, competition')
+      .eq('id', input.game_id)
+      .single();
+
+    const title = game
+      ? `${game.home_team} x ${game.away_team}${game.competition ? ` — ${game.competition}` : ''}`
+      : 'Bolão';
+
     const prizePercentage = 100 - input.admin_fee_percentage;
     const adminFee = calculateAdminFee(input.ticket_amount, input.admin_fee_percentage);
     const prizeContribution = calculatePrizeContribution(input.ticket_amount, prizePercentage);
     const minimumPrize = calculateMinimumPrize(input.ticket_amount);
-    const supabase = createServiceSupabaseClient();
+
     const { data, error } = await supabase.from('pools').insert({
       ...input,
+      title,
       prize_percentage: prizePercentage,
       admin_fee_amount: adminFee,
       prize_contribution_amount: prizeContribution,
