@@ -3,13 +3,20 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Calendar, Trophy, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Medal, Calendar, Trophy, Ticket, Target, CreditCard, Wallet, UserCircle, Users, LogOut, Menu, X } from 'lucide-react';
 import { createBrowserSupabaseClient } from '@/lib/supabase/client';
 
 const navItems = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/competicoes', label: 'Competições', icon: Medal },
   { href: '/admin/jogos', label: 'Jogos', icon: Calendar },
   { href: '/admin/boloes', label: 'Bolões', icon: Trophy },
+  { href: '/admin/bilhetes', label: 'Bilhetes', icon: Ticket },
+  { href: '/admin/palpites', label: 'Palpites', icon: Target },
+  { href: '/admin/pagamentos', label: 'Pagamentos', icon: CreditCard },
+  { href: '/admin/caixa', label: 'Caixa', icon: Wallet },
+  { href: '/admin/participantes', label: 'Cadastros', icon: UserCircle },
+  { href: '/admin/usuarios', label: 'Usuários', icon: Users },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

@@ -28,10 +28,11 @@ export async function POST(request: NextRequest) {
     const prizePercentage = 100 - input.admin_fee_percentage;
     const adminFee = calculateAdminFee(input.ticket_amount, input.admin_fee_percentage);
     const prizeContribution = calculatePrizeContribution(input.ticket_amount, prizePercentage);
-    const minimumPrize = calculateMinimumPrize(input.ticket_amount);
+    const minimumPrize = input.minimum_prize_override ?? calculateMinimumPrize(input.ticket_amount);
+    const { minimum_prize_override: _override, ...insertInput } = input;
 
     const { data, error } = await supabase.from('pools').insert({
-      ...input,
+      ...insertInput,
       title,
       prize_percentage: prizePercentage,
       admin_fee_amount: adminFee,

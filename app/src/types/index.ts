@@ -61,6 +61,9 @@ export interface Guess {
   created_at: string;
   paid_at: string | null;
   canceled_at: string | null;
+  comprovante_key?: string | null;
+  email?: string | null;
+  cpf?: string | null;
 }
 
 export interface Payment {

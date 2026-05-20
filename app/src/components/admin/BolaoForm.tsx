@@ -70,6 +70,14 @@ export function BolaoForm({ games }: { games: GameOption[] }) {
         </div>
       </div>
 
+      <div>
+        <p className="mb-1 text-xs font-bold uppercase tracking-wider text-zinc-500">Prêmio mínimo (R$) — opcional</p>
+        <Input name="minimum_prize_override" type="number" step="0.01" min="0.01" placeholder="Deixe em branco para usar o padrão automático" />
+        <p className="mt-1 text-xs text-zinc-600">
+          Padrão: bilhete ≤ R$19,90 → ×20 · bilhete &gt; R$19,90 → ×10
+        </p>
+      </div>
+
       {error && (
         <div className="rounded-lg border border-red-800 bg-red-950 p-3 text-sm text-red-200">{error}</div>
       )}

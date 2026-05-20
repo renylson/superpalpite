@@ -14,7 +14,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     }
 
     if (payment.status === 'approved') {
-      return NextResponse.json({ status: payment.status, paid: true });
+      const { data: g } = await supabase.from('guesses').select('comprovante_key').eq('id', payment.guess_id).single();
+      return NextResponse.json({ status: payment.status, paid: true, comprovante_key: g?.comprovante_key });
     }
 
     if (!payment.mercado_pago_id) {
@@ -45,7 +46,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       await supabase.from('guesses').update({ payment_status: 'approved', status: 'pago_valido', paid_at: paidAt }).eq('id', guess.id);
       await recalculatePoolFinancials(payment.pool_id);
       await supabase.from('audit_logs').insert({ action: 'payment_checked_approved', entity_type: 'payment', entity_id: payment.id, metadata: { mercado_pago_id: payment.mercado_pago_id } });
-      return NextResponse.json({ status: 'approved', paid: true });
+      const { data: g2 } = await supabase.from('guesses').select('comprovante_key').eq('id', guess.id).single();
+      return NextResponse.json({ status: 'approved', paid: true, comprovante_key: g2?.comprovante_key });
     }
 
     await supabase.from('payments').update({ status: details.status, updated_at: new Date().toISOString() }).eq('id', payment.id);

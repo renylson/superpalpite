@@ -24,11 +24,30 @@ export async function POST(request: NextRequest) {
     const prizeContribution = calculatePrizeContribution(ticketAmount, Number(pool.prize_percentage));
     const publicName = abbreviateName(input.nome);
 
+    function generateComprovanteKey(): string {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      return 'SP' + Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    }
+    const comprovanteKey = generateComprovanteKey();
+
+    // Upsert participante
+    await supabase.from('participants').upsert({
+      cpf: input.cpf,
+      nome: input.nome,
+      whatsapp: input.whatsapp,
+      email: input.email,
+      pix_type: input.pix_type,
+      pix_key: input.pix_key,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'cpf' });
+
     const { data: guess, error: guessError } = await supabase.from('guesses').insert({
       pool_id: pool.id,
       game_id: pool.game_id,
       nome: input.nome,
       whatsapp: input.whatsapp,
+      email: input.email,
+      cpf: input.cpf,
       pix_key: input.pix_key,
       home_score: input.home_score,
       away_score: input.away_score,
@@ -38,6 +57,7 @@ export async function POST(request: NextRequest) {
       payment_status: 'pending',
       status: 'aguardando_pagamento',
       public_name: publicName,
+      comprovante_key: comprovanteKey,
     }).select('*').single();
     if (guessError || !guess) throw new Error('Não foi possível salvar o palpite.');
 
@@ -48,7 +68,7 @@ export async function POST(request: NextRequest) {
         description: `Super Palpite - ${pool.title}`,
         payerName: input.nome,
         externalReference: guess.id,
-        expiresInMinutes: 30,
+        expiresInMinutes: 10,
       });
     } catch (error) {
       await supabase.from('guesses').delete().eq('id', guess.id);
@@ -73,6 +93,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       guess_id: guess.id,
       payment_id: payment.id,
+      comprovante_key: comprovanteKey,
       qr_code: pix.qr_code,
       qr_code_base64: pix.qr_code_base64,
       copy_paste_code: pix.copy_paste_code,

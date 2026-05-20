@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Badge } from '@/components/ui/Badge';
 import { TeamLogo } from '@/components/TeamLogo';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import type { Pool } from '@/types';
@@ -20,16 +19,9 @@ export function BolaoCard({ pool }: { pool: Pool }) {
 
       {/* Cabeçalho */}
       <div className="border-b border-zinc-800 px-4 py-3">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">
-            {game?.competition || 'Futebol'}
-          </p>
-          {!isOpen && !isClosed && (
-            <Badge className="border-zinc-700/50 bg-zinc-700/20 text-zinc-500">
-              {pool.status}
-            </Badge>
-          )}
-        </div>
+        <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+          {game?.competition || 'Futebol'}
+        </p>
       </div>
 
       {/* Times com logos */}
@@ -53,11 +45,14 @@ export function BolaoCard({ pool }: { pool: Pool }) {
         {game?.match_date && (
           <p className="mt-3 text-center text-xs text-zinc-500">{formatDateTime(game.match_date)}</p>
         )}
+        {game?.stadium && (
+          <p className="mt-1 text-center text-xs text-zinc-600">{game.stadium}</p>
+        )}
       </div>
 
       {/* Prêmio em destaque */}
       <div className="border-y border-zinc-800 bg-sp-black/40 px-4 py-4 text-center">
-        <p className="text-xs uppercase tracking-widest text-zinc-500">Prêmio atual</p>
+        <p className="text-xs uppercase tracking-widest text-zinc-500">Prêmio</p>
         <p className="mt-1 text-3xl font-black text-sp-gold">{formatCurrency(pool.current_prize_amount)}</p>
       </div>
 
@@ -65,11 +60,11 @@ export function BolaoCard({ pool }: { pool: Pool }) {
       <div className="mt-auto px-4 pb-4">
         <div className="my-4 grid grid-cols-2 gap-3 text-sm">
           <div className="rounded-lg border border-zinc-800 bg-sp-black/40 p-3 text-center">
-            <p className="text-xs text-zinc-500">Bilhete</p>
+            <p className="text-xs text-zinc-500">Valor do Palpite</p>
             <p className="mt-0.5 font-black">{formatCurrency(pool.ticket_amount)}</p>
           </div>
           <div className="rounded-lg border border-zinc-800 bg-sp-black/40 p-3 text-center">
-            <p className="text-xs text-zinc-500">Confirmados</p>
+            <p className="text-xs text-zinc-500">Palpites Registrados</p>
             <p className="mt-0.5 font-black">{pool.paid_guesses_count}</p>
           </div>
         </div>
@@ -77,9 +72,9 @@ export function BolaoCard({ pool }: { pool: Pool }) {
         {isOpen ? (
           <Link
             href={`/bolao/${pool.id}`}
-            className="flex min-h-11 w-full items-center justify-center rounded-lg bg-sp-gold font-black text-sp-black transition hover:bg-sp-gold-dark"
+            className="flex min-h-11 w-full items-center justify-center rounded-lg bg-sp-gold font-black text-sp-black transition hover:brightness-110 hover:shadow-lg hover:shadow-sp-gold/25"
           >
-            ⚡ Participar agora
+            Participar agora
           </Link>
         ) : (
           <Link

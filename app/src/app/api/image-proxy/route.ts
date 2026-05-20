@@ -8,6 +8,10 @@ const ALLOWED_DOMAINS = [
   'api.sofascore.com',
   'upload.wikimedia.org',
   'crests.football-data.org',
+  'flashscore.com',
+  'static.flashscore.com',
+  'images.flashscore.com',
+  'cdn.flashscore.com',
 ];
 
 export async function GET(request: NextRequest) {

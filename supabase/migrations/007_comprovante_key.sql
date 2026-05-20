@@ -1,0 +1,2 @@
+ALTER TABLE guesses
+  ADD COLUMN IF NOT EXISTS comprovante_key TEXT UNIQUE;

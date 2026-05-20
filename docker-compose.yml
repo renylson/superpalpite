@@ -10,6 +10,7 @@ services:
         NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
         NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID}
     container_name: superpalpite_app
     restart: unless-stopped
     ports:
@@ -17,3 +18,23 @@ services:
     env_file: .env
     networks:
       - superpalpite_net
+
+  cleanup_cron:
+    image: curlimages/curl:latest
+    container_name: superpalpite_cleanup
+    restart: unless-stopped
+    env_file: .env
+    networks:
+      - superpalpite_net
+    depends_on:
+      - superpalpite_app
+    entrypoint:
+      - sh
+      - -c
+      - |
+        while true; do
+          curl -s -X POST http://superpalpite_app:3000/api/cron/cleanup-pending \
+            -H "x-cron-secret: $$CRON_SECRET" \
+            && echo "[cleanup] OK" || echo "[cleanup] falhou"
+          sleep 1800
+        done

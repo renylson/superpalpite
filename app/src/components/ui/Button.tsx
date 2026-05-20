@@ -4,9 +4,9 @@ import { cn } from '@/lib/utils';
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-sp-gold text-sp-black hover:bg-sp-gold-dark',
+  primary: 'bg-sp-gold text-sp-black hover:brightness-110 hover:shadow-lg hover:shadow-sp-gold/25',
   secondary: 'bg-sp-card text-sp-white hover:bg-zinc-700',
-  danger: 'bg-sp-error text-white hover:bg-red-600',
+  danger: 'bg-sp-error text-white hover:brightness-110',
   ghost: 'bg-transparent text-sp-gold hover:bg-sp-card',
 };
 

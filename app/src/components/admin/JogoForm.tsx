@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { createBrowserSupabaseClient } from '@/lib/supabase/client';
@@ -70,6 +70,13 @@ function TeamField({ label, namePrefix, defaultName, defaultLogo }: {
 export function JogoForm({ game }: { game?: Game }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [competitions, setCompetitions] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    fetch('/api/admin/competicoes').then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setCompetitions(data);
+    }).catch(() => {});
+  }, []);
 
   async function submit(formData: FormData) {
     setError('');
@@ -111,7 +118,17 @@ export function JogoForm({ game }: { game?: Game }) {
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <p className="mb-1 text-xs font-bold uppercase tracking-wider text-zinc-500">Competição</p>
-          <Input name="competition" placeholder="Ex: Brasileirão Série A" defaultValue={game?.competition ?? ''} />
+          {competitions.length > 0 ? (
+            <select name="competition" defaultValue={game?.competition ?? ''}
+              className="min-h-11 w-full rounded-md border border-zinc-700 bg-sp-black px-3 text-sm text-sp-white outline-none focus:border-sp-gold">
+              <option value="">Selecione uma competição</option>
+              {competitions.map(c => (
+                <option key={c.id} value={c.name}>{c.name}</option>
+              ))}
+            </select>
+          ) : (
+            <Input name="competition" placeholder="Ex: Brasileirão Série A" defaultValue={game?.competition ?? ''} />
+          )}
         </div>
         <div>
           <p className="mb-1 text-xs font-bold uppercase tracking-wider text-zinc-500">Estádio</p>

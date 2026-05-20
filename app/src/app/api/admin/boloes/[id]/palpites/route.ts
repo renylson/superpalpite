@@ -18,6 +18,11 @@ function makePublicName(nome: string): string {
   return `${parts[0]} ${parts[parts.length - 1][0]}.`;
 }
 
+function generateComprovanteKey(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return 'SP' + Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
@@ -43,6 +48,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         home_score: input.home_score,
         away_score: input.away_score,
         public_name: makePublicName(input.nome),
+        comprovante_key: generateComprovanteKey(),
         payment_status: 'approved',
         status: 'pago_valido',
         paid_at: new Date().toISOString(),

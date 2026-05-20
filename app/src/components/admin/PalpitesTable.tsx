@@ -74,6 +74,7 @@ export function PalpitesTable({ guesses: initial }: { guesses: Guess[] }) {
               <th className="px-4 py-3">Pagamento</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Data</th>
+              <th className="px-4 py-3">Bilhete</th>
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
@@ -100,6 +101,20 @@ export function PalpitesTable({ guesses: initial }: { guesses: Guess[] }) {
                   <td className={`px-4 py-3 ${st.color}`}>{st.label}</td>
                   <td className="px-4 py-3 text-zinc-500">
                     {new Date(guess.created_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+                  </td>
+                  <td className="px-4 py-3">
+                    {guess.comprovante_key ? (
+                      <a
+                        href={`/comprovante/${guess.comprovante_key}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded px-2 py-1 text-xs font-bold text-sp-gold hover:underline"
+                      >
+                        Ver
+                      </a>
+                    ) : (
+                      <span className="text-xs text-zinc-600">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <button

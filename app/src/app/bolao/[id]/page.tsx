@@ -41,6 +41,7 @@ export default async function PoolPage({ params }: { params: Promise<{ id: strin
 
   const game = data.pool.games;
   const isOpen = data.pool.status === 'aberto';
+  const isResultPublished = ['resultado_publicado', 'premio_pago'].includes(data.pool.status);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -70,77 +71,98 @@ export default async function PoolPage({ params }: { params: Promise<{ id: strin
               {/* Times com logos */}
               <div className="flex items-center justify-between gap-6">
                 <div className="flex flex-1 flex-col items-center gap-3 text-center">
-                  <TeamLogo
-                    logo={game?.home_team_logo}
-                    name={game?.home_team || 'Casa'}
-                    size={64}
-                  />
+                  <TeamLogo logo={game?.home_team_logo} name={game?.home_team || 'Casa'} size={64} />
                   <p className="text-xl font-black">{game?.home_team || 'Casa'}</p>
                 </div>
 
                 <div className="text-center">
-                  <span className="rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm font-black text-zinc-400">
-                    VS
-                  </span>
+                  {isResultPublished && game?.result_home_score !== null && game?.result_home_score !== undefined ? (
+                    <div>
+                      <p className="text-3xl font-black text-sp-gold">
+                        {game.result_home_score} × {game.result_away_score}
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-500">placar final</p>
+                    </div>
+                  ) : (
+                    <span className="rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm font-black text-zinc-400">
+                      VS
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex flex-1 flex-col items-center gap-3 text-center">
-                  <TeamLogo
-                    logo={game?.away_team_logo}
-                    name={game?.away_team || 'Visitante'}
-                    size={64}
-                  />
+                  <TeamLogo logo={game?.away_team_logo} name={game?.away_team || 'Visitante'} size={64} />
                   <p className="text-xl font-black">{game?.away_team || 'Visitante'}</p>
                 </div>
               </div>
 
               {/* Data e countdown */}
               {game?.match_date && (
-                <div className="mt-5 rounded-lg border border-zinc-800 bg-sp-black/40 p-4 text-center">
-                  <p className="text-sm text-zinc-400">{formatDateTime(game.match_date)}</p>
-                  {isOpen && (
-                    <p className="mt-1 text-sm">
-                      Fecha em <CountdownTimer matchDate={game.match_date} />
-                    </p>
-                  )}
+                <div className="mt-5 space-y-4 rounded-xl border border-zinc-800 bg-sp-black/40 p-5">
+                  <p className="text-center text-sm text-zinc-400">{formatDateTime(game.match_date)}</p>
+                  {isOpen && <CountdownTimer matchDate={game.match_date} />}
                 </div>
               )}
             </div>
           </div>
 
           {/* Métricas */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-zinc-800 bg-sp-dark p-4 text-center">
-              <p className="text-xs text-zinc-500">Bilhete</p>
+              <p className="text-xs text-zinc-500">Valor do Palpite</p>
               <p className="mt-1 text-lg font-black">{formatCurrency(data.pool.ticket_amount)}</p>
             </div>
             <div className="rounded-xl border border-zinc-800 bg-sp-dark p-4 text-center">
-              <p className="text-xs text-zinc-500">Prêmio mínimo</p>
-              <p className="mt-1 text-lg font-black">{formatCurrency(data.pool.minimum_prize_amount)}</p>
-            </div>
-            <div className="rounded-xl border border-zinc-800 bg-sp-dark p-4 text-center">
-              <p className="text-xs text-zinc-500">Confirmados</p>
+              <p className="text-xs text-zinc-500">Palpites Registrados</p>
               <p className="mt-1 text-lg font-black">{data.pool.paid_guesses_count}</p>
             </div>
           </div>
 
-          {/* Prêmio atual em destaque */}
-          <div className="rounded-xl border border-sp-gold/20 bg-gradient-to-r from-sp-gold/5 to-transparent p-6">
-            <p className="text-sm uppercase tracking-widest text-zinc-400">🏆 Prêmio atual</p>
-            <PremioAtual poolId={data.pool.id} initialPrize={data.pool.current_prize_amount} />
-            <p className="mt-2 text-xs text-zinc-500">
-              Atualizado em tempo real · {formatCurrency(data.pool.total_prize_contribution_amount)} acumulados
-            </p>
+          {/* Prêmio em destaque */}
+          <div className="relative overflow-hidden rounded-xl border border-sp-gold/30 bg-sp-dark p-6">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,215,0,0.07),transparent_65%)]" />
+            <div className="relative">
+              <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                {isResultPublished ? 'Valor do Prêmio Pago' : 'Valor do Prêmio Atual'}
+              </p>
+              <div className="mt-2">
+                <PremioAtual poolId={data.pool.id} initialPrize={data.pool.current_prize_amount} />
+              </div>
+              {!isResultPublished && (
+                <>
+                  <p className="mt-3 text-sm font-bold text-zinc-300">
+                    Acerte o placar exato e leve o prêmio! 🏆
+                  </p>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    O prêmio é dividido igualmente entre todos que acertarem.
+                  </p>
+                </>
+              )}
+              {isResultPublished && (
+                <p className="mt-3 text-xs text-zinc-500">
+                  O prêmio foi dividido entre os acertadores do placar exato.
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Lista de palpites */}
-          <ListaPalpites poolId={data.pool.id} initialGuesses={data.guesses} />
+          <ListaPalpites
+            poolId={data.pool.id}
+            initialGuesses={data.guesses}
+            resultHomeScore={game?.result_home_score}
+            resultAwayScore={game?.result_away_score}
+          />
         </div>
 
         {/* Sidebar — formulário */}
         <aside className="space-y-4">
           {isOpen ? (
-            <PalpiteForm poolId={data.pool.id} />
+            <PalpiteForm
+              poolId={data.pool.id}
+              homeTeam={game?.home_team}
+              awayTeam={game?.away_team}
+            />
           ) : (
             <div className="rounded-xl border border-zinc-700 bg-sp-dark p-5 text-center">
               <span className="text-4xl">🔒</span>
@@ -149,14 +171,14 @@ export default async function PoolPage({ params }: { params: Promise<{ id: strin
                 Este bolão não está mais aceitando palpites.
               </p>
               <Link href="/" className="mt-4 inline-block text-sm text-sp-gold hover:underline">
-                Ver outros bolões
+                Ver outros jogos
               </Link>
             </div>
           )}
 
           <div className="rounded-xl border border-zinc-800 bg-sp-dark p-4 text-sm text-zinc-400">
             <p className="font-bold text-zinc-300">Como funciona:</p>
-            <ol className="mt-2 space-y-1.5 list-inside list-decimal">
+            <ol className="mt-2 list-inside list-decimal space-y-1.5">
               <li>Escolha o placar que você acha que vai sair</li>
               <li>Informe seus dados e a chave Pix</li>
               <li>Pague o Pix dentro do prazo</li>
