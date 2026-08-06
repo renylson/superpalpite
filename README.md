@@ -12,11 +12,11 @@ Plataforma full-stack demonstrativa para gerenciamento de bolões de placar exat
 
 ### Página inicial
 
-![Página inicial do Super Palpite](docs/screenshots/home.png)
+![Página inicial do Super Palpite](/home.png)
 
 ### Painel administrativo
 
-![Dashboard administrativo](docs/screenshots/dashboard.png)
+![Dashboard administrativo](/dashboard.png)
 
 ## Demonstração
 
