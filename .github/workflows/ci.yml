@@ -39,6 +39,9 @@ jobs:
         run: npm ci
 
       - name: Verificar TypeScript
+        run: npm run typecheck
+
+      - name: Executar ESLint
         run: npm run lint
 
       - name: Executar testes
