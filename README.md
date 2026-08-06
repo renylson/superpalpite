@@ -1,3 +1,5 @@
+![CI](https://github.com/renylson/superpalpite/actions/workflows/ci.yml/badge.svg)
+
 # Super Palpite
 
 Plataforma full-stack demonstrativa para gerenciamento de bolões de placar exato, com painel administrativo, pagamentos Pix, apuração de resultados e controle financeiro.
@@ -5,6 +7,16 @@ Plataforma full-stack demonstrativa para gerenciamento de bolões de placar exat
 > **Projeto de portfólio:** esta aplicação foi desenvolvida para demonstrar conhecimentos em engenharia de software, TypeScript, Next.js, PostgreSQL, autenticação, integrações, segurança e deploy com Docker.
 >
 > O ambiente publicado utiliza somente dados fictícios e não representa uma operação comercial de apostas.
+
+## Screenshots
+
+### Página inicial
+
+![Página inicial do Super Palpite](docs/screenshots/home.png)
+
+### Painel administrativo
+
+![Dashboard administrativo](docs/screenshots/dashboard.png)
 
 ## Demonstração
 
@@ -141,18 +153,23 @@ A autorização deve ser validada no backend independentemente dos controles exi
 
 ## Segurança
 
-Cuidados incorporados ou planejados no projeto:
+### Implementado
 
-- segredos disponíveis somente no ambiente do servidor;
+- segredos mantidos no ambiente do servidor;
 - validação de payloads com Zod;
-- comparação do valor recebido com o valor esperado;
-- proteção das tabelas com Row Level Security;
-- views públicas com conjunto reduzido de colunas;
-- limitação de requisições em endpoints sensíveis;
-- validação criptográfica de webhooks;
-- processamento idempotente de pagamentos;
-- separação entre usuários administradores e viewers;
-- execução do container como usuário sem privilégios.
+- consulta do pagamento diretamente no provedor;
+- comparação entre valor recebido e valor esperado;
+- execução do container como usuário sem privilégios;
+- views públicas com conjunto reduzido de colunas.
+
+### Em evolução
+
+- autorização server-side em todas as páginas administrativas;
+- matriz de permissões dos perfis `admin` e `viewer`;
+- revisão completa das políticas RLS;
+- validação HMAC do webhook;
+- idempotência transacional de pagamentos;
+- rate limiting compartilhado entre instâncias.
 
 ## Testes e qualidade
 
