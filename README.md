@@ -1,8 +1,8 @@
-![CI](https://github.com/renylson/superpalpite/actions/workflows/ci.yml/badge.svg)
-
 # Super Palpite
 
 Plataforma full-stack demonstrativa para gerenciamento de bolões de placar exato, com painel administrativo, pagamentos Pix, apuração de resultados e controle financeiro.
+
+[![CI](https://github.com/renylson/superpalpite/actions/workflows/ci.yml/badge.svg)](https://github.com/renylson/superpalpite/actions/workflows/ci.yml)
 
 > **Projeto de portfólio:** esta aplicação foi desenvolvida para demonstrar conhecimentos em engenharia de software, TypeScript, Next.js, PostgreSQL, autenticação, integrações, segurança e deploy com Docker.
 >
